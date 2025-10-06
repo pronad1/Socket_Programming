@@ -11,7 +11,7 @@ This client implementation:
 - Launches media player when sufficient data is received
 - Supports real-time streaming during download
 
-Author: [Your Name]
+Author: Prosenjit Mondol
 Date: October 2025
 Course: Computer Networks - Socket Programming
 """
