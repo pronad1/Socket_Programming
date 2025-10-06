@@ -42,6 +42,11 @@ class UDPStreamingServer:
         self.running = False
         self.clients = {}  # Track active streaming sessions
         
+        # Ensure media directory is relative to script location
+        if not os.path.isabs(self.media_directory):
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            self.media_directory = os.path.join(script_dir, media_directory)
+        
         # Ensure media directory exists
         if not os.path.exists(self.media_directory):
             os.makedirs(self.media_directory)
@@ -347,7 +352,9 @@ def main():
         media_dir = sys.argv[3]
     
     # Create sample media file if directory is empty
-    abs_media_dir = os.path.abspath(media_dir)
+    # Ensure media directory is relative to script location
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    abs_media_dir = os.path.join(script_dir, media_dir)
     sample_file_path = os.path.join(abs_media_dir, "sample_media.txt")
     
     if not os.path.exists(abs_media_dir):

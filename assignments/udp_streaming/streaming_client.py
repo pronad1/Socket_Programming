@@ -57,6 +57,11 @@ class UDPStreamingClient:
         self.media_player_launched = False
         self.playback_threshold = 50000  # Bytes to buffer before starting playback
         
+        # Ensure buffer directory is relative to script location
+        if not os.path.isabs(self.buffer_dir):
+            script_dir = os.path.dirname(os.path.abspath(__file__))
+            self.buffer_dir = os.path.join(script_dir, buffer_dir)
+        
         # Ensure buffer directory exists
         if not os.path.exists(self.buffer_dir):
             os.makedirs(self.buffer_dir)
@@ -210,14 +215,14 @@ class UDPStreamingClient:
         """
         try:
             # Packet format: [TYPE:1][SEQ:4][DATA_SIZE:4][BYTES_SENT:8][TOTAL_SIZE:8][DATA:variable]
-            if len(data) < 21:  # Minimum header size
+            if len(data) < 25:  # Minimum header size (1+4+4+8+8 = 25)
                 return {'type': 'INVALID'}
             
-            packet_type_byte, seq_num, data_size, bytes_sent, total_size = struct.unpack('!BII QQ', data[:21])
+            packet_type_byte, seq_num, data_size, bytes_sent, total_size = struct.unpack('!BII QQ', data[:25])
             packet_type = chr(packet_type_byte)
             
             if packet_type == 'D':  # Data packet
-                packet_data = data[21:21+data_size]
+                packet_data = data[25:25+data_size]
                 return {
                     'type': 'DATA',
                     'sequence': seq_num,
