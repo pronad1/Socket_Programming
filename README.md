@@ -413,13 +413,13 @@ Original assignments copyright 1993-2025, J.F. Kurose, K.W. Ross, All Rights Res
 
 ## Contact
 
-**Project Maintainer**: [Your Name]
+**Project Maintainer**: [Prosenjit Mondol]
 - GitHub: [@pronad1](https://github.com/pronad1)
 - Email: [prosenjit1156@gmail.com]
 
 **Course Information**:
 - Course: Computer Networks / Socket Programming
-- Institution: [Patuakhali Science & Technology University]
+- Institution: [Patuakhali Science and Technology University]
 - Semester: [5th]
 
 **Resources**:
