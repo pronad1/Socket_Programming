@@ -103,39 +103,63 @@ javac *.java
 
 ```
 Socket_Programming/
-├── README.md
-├── requirements.txt
-├── docs/
-│   ├── protocol_specifications.md
-│   ├── testing_guide.md
-│   └── performance_analysis.md
-├── src/
-│   ├── python/
-│   │   ├── simple_socket/
-│   │   │   ├── server.py
-│   │   │   └── client.py
-│   │   ├── web_server/
-│   │   │   └── webserver.py
-│   │   ├── udp_pinger/
+├── README.md                          # This comprehensive guide
+├── requirements.txt                   # Python dependencies
+├── src/                              # Source code directory
+│   ├── python/                       # Python implementations
+│   │   ├── simple_socket/           # Basic socket examples
+│   │   │   ├── server.py           # TCP server implementation
+│   │   │   └── client.py           # TCP client implementation
+│   │   ├── web_server/             # HTTP server implementation
+│   │   │   └── webserver.py        # Basic HTTP web server
+│   │   ├── udp_pinger/             # UDP ping implementation
 │   │   │   ├── udp_pinger_server.py
 │   │   │   └── udp_pinger_client.py
-│   │   └── smtp_client/
+│   │   └── smtp_client/            # SMTP client implementation
 │   │       └── smtp_client.py
-│   ├── java/
-│   │   ├── SimpleSocket/
-│   │   ├── UDPPinger/
-│   │   └── WebProxy/
-│   └── c/
-│       ├── simple_socket/
-│       ├── rdt_protocol/
-│       └── distance_vector/
-├── tests/
-│   ├── unit_tests/
-│   ├── integration_tests/
-│   └── performance_tests/
-└── examples/
-    ├── sample_configs/
-    └── demo_scripts/
+│   ├── java/                        # Java implementations
+│   │   ├── SimpleSocket/           # Basic socket examples
+│   │   ├── UDPPinger/             # UDP ping implementation
+│   │   └── WebProxy/              # Web proxy server
+│   ├── c/                          # C implementations
+│   │   ├── simple_socket/         # Basic socket examples
+│   │   ├── rdt_protocol/          # Reliable data transfer
+│   │   └── distance_vector/       # Distance vector routing
+│   └── video_streaming/            # 🎬 Professional Video Streaming System
+│       ├── server/                 # RTSP/RTP streaming server
+│       │   └── video_server.py    # Main video streaming server
+│       ├── client/                 # GUI video streaming client
+│       │   └── video_client.py    # Professional video client
+│       ├── protocols/              # Protocol implementations
+│       │   ├── rtsp_protocol.py   # RTSP protocol handling
+│       │   └── rtp_protocol.py    # RTP packet management
+│       ├── utils/                  # Video streaming utilities
+│       │   └── video_utils.py     # Video processing utilities
+│       ├── media/                  # Sample media files
+│       │   └── create_samples.py  # Media file generator
+│       ├── tests/                  # Comprehensive test suite
+│       │   └── test_video_streaming.py
+│       └── README.md               # Video streaming documentation
+├── assignments/                      # Programming assignments
+│   ├── udp_streaming/               # UDP streaming assignment
+│   │   ├── streaming_server.py     # UDP streaming server
+│   │   ├── streaming_client.py     # UDP streaming client
+│   │   ├── test_streaming.py       # Automated test suite
+│   │   └── quick_test.py           # Quick validation tool
+│   ├── tcp_file_transfer/          # File transfer assignment
+│   ├── multi_threading/            # Multi-threading exercises
+│   └── network_protocols/          # Protocol implementation
+├── docs/                            # Documentation and guides
+│   ├── protocol_specifications.md  # Protocol documentation
+│   ├── testing_guide.md           # Testing procedures
+│   └── performance_analysis.md    # Performance metrics
+├── tests/                          # Test files and scripts
+│   ├── unit_tests/                 # Unit test cases
+│   ├── integration_tests/          # Integration test cases
+│   └── performance_tests/          # Performance benchmarks
+└── examples/                       # Example configurations
+    ├── sample_configs/             # Sample configuration files
+    └── demo_scripts/              # Demonstration scripts
 ```
 
 ## Usage
@@ -193,7 +217,30 @@ Server response: HELLO, SERVER!
 - **Description**: Email client implementation using SMTP protocol
 - **Location**: `src/[language]/smtp_client/`
 
-### 5. HTTP Web Proxy Server
+### 5. Professional Video Streaming System 🎬
+- **Language**: Python
+- **Protocols**: RTSP/RTP
+- **Description**: Complete video streaming solution with GUI client and RTSP/RTP server
+- **Features**:
+  - RTSP control protocol implementation
+  - RTP real-time video streaming
+  - GUI client with playback controls
+  - Multiple quality profiles (480p-4K)
+  - Video library management
+  - Cross-platform media player integration
+- **Location**: `src/video_streaming/`
+- **Quick Start**:
+  ```bash
+  # Start server
+  cd src/video_streaming/server
+  python video_server.py
+  
+  # Launch client (in new terminal)
+  cd src/video_streaming/client
+  python video_client.py
+  ```
+
+### 6. HTTP Web Proxy Server
 - **Languages**: Python, Java
 - **Protocol**: HTTP over TCP
 - **Description**: Proxy server implementation with caching capabilities
@@ -201,7 +248,54 @@ Server response: HELLO, SERVER!
 
 ## Testing
 
-### Unit Tests
+### Quick Testing Options
+
+**🚀 Automated Test Runner (Recommended)**
+```bash
+# Windows
+run_tests.bat
+
+# Linux/Mac  
+chmod +x run_tests.sh
+./run_tests.sh
+```
+
+**⚡ Quick Validation**
+```bash
+# Check if everything is working
+python validate_project.py
+
+# Quick health check only
+python validate_project.py --quick
+```
+
+**📋 Component-Specific Testing**
+```bash
+# Test UDP streaming assignment
+cd assignments/udp_streaming
+python quick_test.py
+
+# Test video streaming system
+cd src/video_streaming
+python run_project_tests.py
+
+# Start complete video streaming system
+cd src/video_streaming  
+python start_streaming.py all
+```
+
+### Test Categories
+- **Project Structure**: Verify all files and directories exist
+- **Dependencies**: Check Python version and required modules  
+- **Network Connectivity**: Test socket creation and port binding
+- **Assignment Functionality**: UDP streaming with 1000-2000 byte chunks
+- **Video Streaming System**: RTSP/RTP protocols, GUI client, server functionality
+- **Integration**: End-to-end client-server communication
+- **Performance**: Streaming throughput and latency benchmarks
+
+📖 **Detailed Testing Guide**: See [TESTING.md](TESTING.md) for comprehensive testing instructions.
+
+### Legacy Unit Tests
 ```bash
 # Run Python tests
 python -m pytest tests/unit_tests/

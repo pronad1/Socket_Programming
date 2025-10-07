@@ -1,0 +1,19 @@
+{
+  "sample_480p.mp4": {
+    "name": "sample_480p.mp4",
+    "path": "D:\\Languages\\Socket_Programming\\src\\video_streaming\\media\\sample_480p.mp4",
+    "size": 5242928,
+    "duration": 60.0,
+    "resolution": "1280x720",
+    "framerate": 30.0,
+    "bitrate": 2500,
+    "video_codec": "h264",
+    "audio_codec": "aac",
+    "format": "mp4",
+    "description": "1280x720 H264 video",
+    "metadata": {
+      "method": "basic",
+      "note": "Estimated values"
+    }
+  }
+}
