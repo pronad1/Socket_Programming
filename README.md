@@ -415,12 +415,12 @@ Original assignments copyright 1993-2025, J.F. Kurose, K.W. Ross, All Rights Res
 
 **Project Maintainer**: [Your Name]
 - GitHub: [@pronad1](https://github.com/pronad1)
-- Email: [email](prosenjit1156@gmail.com)
+- Email: [prosenjit1156@gmail.com]
 
 **Course Information**:
 - Course: Computer Networks / Socket Programming
 - Institution: [Patuakhali Science & Technology University]
-- Semester: [Current Semester](5th)
+- Semester: [5th]
 
 **Resources**:
 - [Official Course Website](https://gaia.cs.umass.edu/kurose_ross/programming.php)
