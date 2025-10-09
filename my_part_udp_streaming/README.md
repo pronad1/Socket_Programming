@@ -45,7 +45,7 @@ udp_streaming/
 ### Quick Test
 1. **Start the server:**
    ```bash
-   cd assignments/udp_streaming
+   cd my_part_udp_streaming
    python streaming_server.py
    ```
 

@@ -33,7 +33,7 @@ class ProjectValidator:
     """Quick validation for all projects"""
     
     def __init__(self):
-        self.base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        self.base_dir = os.path.dirname(os.path.abspath(__file__))
         self.results = []
         
     def validate_all(self) -> bool:
@@ -85,7 +85,7 @@ class ProjectValidator:
             "src/python/simple_socket",
             "src/video_streaming/server",
             "src/video_streaming/client", 
-            "assignments/udp_streaming"
+            "my_part_udp_streaming"
         ]
         
         all_exist = True
@@ -159,7 +159,7 @@ class ProjectValidator:
     def check_assignments(self) -> bool:
         """Check assignment projects"""
         # Check UDP Streaming Assignment
-        udp_assignment_dir = os.path.join(self.base_dir, "assignments", "udp_streaming")
+        udp_assignment_dir = os.path.join(self.base_dir, "my_part_udp_streaming")
         
         if not os.path.exists(udp_assignment_dir):
             self.log_result("UDP Streaming Assignment", False, "Directory not found")
@@ -290,7 +290,7 @@ class ProjectValidator:
             print("   Your socket programming projects are ready to use.")
             print()
             print("🚀 Quick Start Options:")
-            print("   • UDP Assignment:     cd assignments/udp_streaming && python quick_test.py")
+            print("   • UDP Assignment:     cd my_part_udp_streaming && python quick_test.py")
             print("   • Video Streaming:    cd src/video_streaming && python start_streaming.py all")
             print("   • Simple Sockets:     cd src/python/simple_socket && python server.py")
         else:
@@ -308,12 +308,12 @@ def quick_health_check():
     print("⚡ Quick Health Check")
     print("-" * 20)
     
-    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    base_dir = os.path.dirname(os.path.abspath(__file__))
     
     # Check critical files
     critical_files = [
         "src/python/simple_socket/server.py",
-        "assignments/udp_streaming/streaming_server.py",
+        "my_part_udp_streaming/streaming_server.py",
         "src/video_streaming/server/video_server.py"
     ]
     
