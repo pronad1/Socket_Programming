@@ -15,5 +15,90 @@
       "method": "basic",
       "note": "Estimated values"
     }
+  },
+  "test_stream.mp4": {
+    "name": "test_stream.mp4",
+    "path": "/home/runner/work/Socket_Programming/Socket_Programming/src/video_streaming/media/test_stream.mp4",
+    "size": 8388656,
+    "duration": 60.0,
+    "resolution": "1280x720",
+    "framerate": 30.0,
+    "bitrate": 2500,
+    "video_codec": "h264",
+    "audio_codec": "aac",
+    "format": "mp4",
+    "description": "1280x720 H264 video",
+    "metadata": {
+      "method": "basic",
+      "note": "Estimated values"
+    }
+  },
+  "sample_720p.mp4": {
+    "name": "sample_720p.mp4",
+    "path": "/home/runner/work/Socket_Programming/Socket_Programming/src/video_streaming/media/sample_720p.mp4",
+    "size": 15728688,
+    "duration": 60.0,
+    "resolution": "1280x720",
+    "framerate": 30.0,
+    "bitrate": 2500,
+    "video_codec": "h264",
+    "audio_codec": "aac",
+    "format": "mp4",
+    "description": "1280x720 H264 video",
+    "metadata": {
+      "method": "basic",
+      "note": "Estimated values"
+    }
+  },
+  "sample_1080p.mp4": {
+    "name": "sample_1080p.mp4",
+    "path": "/home/runner/work/Socket_Programming/Socket_Programming/src/video_streaming/media/sample_1080p.mp4",
+    "size": 26214448,
+    "duration": 60.0,
+    "resolution": "1280x720",
+    "framerate": 30.0,
+    "bitrate": 2500,
+    "video_codec": "h264",
+    "audio_codec": "aac",
+    "format": "mp4",
+    "description": "1280x720 H264 video",
+    "metadata": {
+      "method": "basic",
+      "note": "Estimated values"
+    }
+  },
+  "demo_video.mp4": {
+    "name": "demo_video.mp4",
+    "path": "/home/runner/work/Socket_Programming/Socket_Programming/src/video_streaming/media/demo_video.mp4",
+    "size": 10485808,
+    "duration": 60.0,
+    "resolution": "1280x720",
+    "framerate": 30.0,
+    "bitrate": 2500,
+    "video_codec": "h264",
+    "audio_codec": "aac",
+    "format": "mp4",
+    "description": "1280x720 H264 video",
+    "metadata": {
+      "method": "basic",
+      "note": "Estimated values"
+    }
+  },
+  "sample_4k.mp4": {
+    "name": "sample_4k.mp4",
+    "path": "/home/runner/work/Socket_Programming/Socket_Programming/src/video_streaming/media/sample_4k.mp4",
+    "size": 52428848,
+    "duration": 60.0,
+    "resolution": "1280x720",
+    "framerate": 30.0,
+    "bitrate": 2500,
+    "video_codec": "h264",
+    "audio_codec": "aac",
+    "format": "mp4",
+    "description": "1280x720 H264 video",
+    "metadata": {
+      "method": "basic",
+      "note": "Estimated values"
+    }
   }
 }

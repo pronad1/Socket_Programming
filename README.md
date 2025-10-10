@@ -272,7 +272,7 @@ python validate_project.py --quick
 **📋 Component-Specific Testing**
 ```bash
 # Test UDP streaming assignment
-cd assignments/udp_streaming
+cd my_part_udp_streaming
 python quick_test.py
 
 # Test video streaming system

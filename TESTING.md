@@ -20,7 +20,7 @@ python validate_project.py --streaming    # Check video streaming only
 ### 2. Assignment Testing (UDP Streaming)
 ```bash
 # Navigate to assignment directory
-cd assignments/udp_streaming
+cd my_part_udp_streaming
 
 # Quick validation test
 python quick_test.py
@@ -91,7 +91,7 @@ python validate_project.py
    ✅ Directory: src/python/simple_socket
    ✅ Directory: src/video_streaming/server
    ✅ Directory: src/video_streaming/client
-   ✅ Directory: assignments/udp_streaming
+   ✅ Directory: my_part_udp_streaming
 
 📋 Python Dependencies
 ------------------------------
@@ -110,7 +110,7 @@ python validate_project.py
 
 ### 2. UDP Assignment Quick Test
 ```bash
-cd assignments/udp_streaming
+cd my_part_udp_streaming
 python quick_test.py
 ```
 **Expected Output:**
@@ -305,7 +305,7 @@ python video_client.py localhost 554 5008
 ```
 Socket_Programming/
 ├── validate_project.py                    # Main validation script
-├── assignments/udp_streaming/
+├── my_part_udp_streaming/
 │   ├── quick_test.py                      # Quick UDP test
 │   └── test_streaming.py                  # Comprehensive UDP tests
 └── src/video_streaming/
@@ -319,7 +319,7 @@ Socket_Programming/
 Before submitting or deploying:
 
 - [ ] **Run full validation**: `python validate_project.py` ✅
-- [ ] **Test UDP assignment**: `cd assignments/udp_streaming && python quick_test.py` ✅  
+- [ ] **Test UDP assignment**: `cd my_part_udp_streaming && python quick_test.py` ✅  
 - [ ] **Test video streaming**: `cd src/video_streaming && python run_project_tests.py` ✅
 - [ ] **Verify sample files**: Check media files are created ✅
 - [ ] **Test network connectivity**: Ensure ports are available ✅
