@@ -1,6 +1,6 @@
 # Socket Programming Laboratory
 
-A comprehensive collection of network programming assignments implementing various socket-based applications and protocols. This project demonstrates fundamental networking concepts through practical implementations using TCP and UDP sockets.
+A comprehensive collection of network programming assignments implementing various socket-based applications and protocols, featuring an enhanced ICMP Pinger Lab. This project demonstrates fundamental networking concepts through practical implementations using TCP, UDP, and ICMP sockets, with a focus on real-time diagnostics and visualization.
 
 ## Table of Contents
 - [Overview](#overview)
@@ -20,42 +20,46 @@ A comprehensive collection of network programming assignments implementing vario
 
 ## Overview
 
-This repository contains implementations of various socket programming assignments designed to provide hands-on experience with network programming concepts. The projects cover client-server architectures, protocol implementations, and network application development.
+This repository contains a collection of socket programming assignments designed to provide hands-on experience with network programming concepts. The projects cover client-server architectures, protocol implementations, and network application development, with significant updates to include the ICMP Pinger Lab. This lab implements a GUI-based ICMP ping application to measure round-trip time (RTT), simulate an Echo Server, and visualize network latency in real-time, completed and tested as of October 16, 2025.
 
 ### Key Concepts Covered:
 - TCP and UDP socket programming
+- ICMP for ping and latency analysis
 - Client-server communication
 - Protocol design and implementation
 - Network application development
 - Error handling and reliability
-- Performance optimization
+- Real-time data visualization
 
 ## Features
 
-- **Multi-language Support**: Implementations available in Python, Java, and C
-- **Comprehensive Examples**: Complete client-server applications
-- **Protocol Implementations**: Custom protocols for various network services
-- **Error Handling**: Robust error detection and recovery mechanisms
+- **Multi-language Support**: Implementations in Python, Java, and C
+- **Comprehensive Examples**: Complete client-server applications, including the enhanced ICMP Pinger Lab
+- **Protocol Implementations**: Custom protocols, ICMP for network diagnostics
+- **Error Handling**: Robust detection and recovery mechanisms
 - **Documentation**: Detailed code documentation and usage examples
-- **Testing Tools**: Built-in testing utilities and performance benchmarks
+- **Testing Tools**: Built-in utilities and performance benchmarks
+- **Real-time Visualization**: RTT graphing and live statistics in the ICMP Pinger Lab
 
 ## Prerequisites
 
 ### Software Requirements:
-- **Python 3.7+** (for Python implementations)
+- **Python 3.7+** (for Python implementations, including ICMP Pinger Lab)
 - **Java 8+** (for Java implementations)
 - **GCC Compiler** (for C implementations)
 - **Git** (for version control)
+- **Scapy**: Install with `pip install scapy` (required for ICMP Pinger Lab)
+- **Npcap**: Download from https://npcap.com/ (required for Windows ICMP functionality)
 
 ### Network Requirements:
 - Access to localhost for testing
 - Optional: Multiple machines for distributed testing
-- Firewall permissions for socket communication
+- Firewall permissions for ICMP, TCP, and UDP communication
 
 ### Knowledge Prerequisites:
 - Basic understanding of networking concepts
-- Familiarity with chosen programming language
-- Understanding of client-server architecture
+- Familiarity with Python (primary language for recent updates)
+- Understanding of client-server architecture and ICMP protocol
 
 ## Installation
 
@@ -164,32 +168,29 @@ Socket_Programming/
 
 ## Usage
 
-### Basic Client-Server Example
+### Running the ICMP Pinger Lab
 
-#### Running the Python TCP Server:
-```bash
-cd src/python/simple_socket/
-python server.py [port_number]
+Launch the Application:
 ```
-
-#### Running the Python TCP Client:
-```bash
-cd src/python/simple_socket/
-python client.py [server_host] [server_port]
+cd src/python/icmp_pinger_lab/
+python main.py
 ```
+Note: Run PowerShell as Administrator for full ICMP functionality.
 
-#### Example Session:
-```bash
-# Terminal 1 (Server)
-python server.py 12000
-Server listening on port 12000...
+Ping Client Usage:
 
-# Terminal 2 (Client)
-python client.py localhost 12000
-Connected to server at localhost:12000
-Enter message: Hello, Server!
-Server response: HELLO, SERVER!
-```
+- Go to the "🏓 Ping Client" tab.
+- Set "Target Host" (e.g., 8.8.8.8 or localhost).
+- Set "Count" (e.g., 10) and "Interval (s)" (e.g., 1.0).
+- Click "🚀 Start Ping" to begin; check the log and RTT graph for results.
+
+Echo Server Usage:
+
+- Go to the "📡 Echo Server" tab.
+- Set "Listen Address" (e.g., 0.0.0.0) and "Response Delay (ms)" (e.g.,50).
+- Click "✅ Validate" and then "▶️ Start Server" to simulate activity.
+Monitor the log for simulated echo replies.
+
 
 ## Available Programs
 
