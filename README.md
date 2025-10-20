@@ -1,6 +1,6 @@
-# Socket Programming Laboratory
+# ICMP Pinger Lab (Python)
 
-A comprehensive collection of network programming assignments implementing various socket-based applications and protocols, featuring an enhanced ICMP Pinger Lab. This project demonstrates fundamental networking concepts through practical implementations using TCP, UDP, and ICMP sockets, with a focus on real-time diagnostics and visualization.
+A simple ICMP ping application with a GUI client and an optional echo server. The client sends ICMP Echo Requests, measures round-trip time (RTT), and reports per-ping results and summary statistics.
 
 ## Table of Contents
 - [Overview](#overview)
@@ -9,424 +9,85 @@ A comprehensive collection of network programming assignments implementing vario
 - [Installation](#installation)
 - [Project Structure](#project-structure)
 - [Usage](#usage)
-- [Available Programs](#available-programs)
-- [Testing](#testing)
-- [Implementation Details](#implementation-details)
-- [Learning Objectives](#learning-objectives)
 - [Troubleshooting](#troubleshooting)
-- [Contributing](#contributing)
 - [License](#license)
 - [Contact](#contact)
 
 ## Overview
-
-This repository contains a collection of socket programming assignments designed to provide hands-on experience with network programming concepts. The projects cover client-server architectures, protocol implementations, and network application development, with significant updates to include the ICMP Pinger Lab. This lab implements a GUI-based ICMP ping application to measure round-trip time (RTT), simulate an Echo Server, and visualize network latency in real-time, completed and tested as of October 16, 2025.
-
-### Key Concepts Covered:
-- TCP and UDP socket programming
-- ICMP for ping and latency analysis
-- Client-server communication
-- Protocol design and implementation
-- Network application development
-- Error handling and reliability
-- Real-time data visualization
+This lab includes:
+- A GUI-based ICMP Ping Client for measuring RTT and packet loss.
+- An optional ICMP Echo Server that replies to Echo Requests (with optional random delay).
 
 ## Features
-
-- **Multi-language Support**: Implementations in Python, Java, and C
-- **Comprehensive Examples**: Complete client-server applications, including the enhanced ICMP Pinger Lab
-- **Protocol Implementations**: Custom protocols, ICMP for network diagnostics
-- **Error Handling**: Robust detection and recovery mechanisms
-- **Documentation**: Detailed code documentation and usage examples
-- **Testing Tools**: Built-in utilities and performance benchmarks
-- **Real-time Visualization**: RTT graphing and live statistics in the ICMP Pinger Lab
+- GUI controls: target host, count, timeout
+- Per-ping RTT and timeout reporting
+- Summary stats: sent/received, loss, average RTT
+- Optional echo server with random delay simulation
+- Threaded client for a responsive UI
 
 ## Prerequisites
-
-### Software Requirements:
-- **Python 3.7+** (for Python implementations, including ICMP Pinger Lab)
-- **Java 8+** (for Java implementations)
-- **GCC Compiler** (for C implementations)
-- **Git** (for version control)
-- **Scapy**: Install with `pip install scapy` (required for ICMP Pinger Lab)
-- **Npcap**: Download from https://npcap.com/ (required for Windows ICMP functionality)
-
-### Network Requirements:
-- Access to localhost for testing
-- Optional: Multiple machines for distributed testing
-- Firewall permissions for ICMP, TCP, and UDP communication
-
-### Knowledge Prerequisites:
-- Basic understanding of networking concepts
-- Familiarity with Python (primary language for recent updates)
-- Understanding of client-server architecture and ICMP protocol
+- Python 3.8+ (Tkinter included in standard Python on Windows)
+- Dependencies (see requirements.txt):
+  - scapy
+  - numpy, matplotlib (optional)
+- Windows:
+  - Run the scripts in an elevated PowerShell (Administrator) for raw sockets
+  - Optional: Npcap (https://npcap.com/) for advanced sniffing
 
 ## Installation
-
-### 1. Clone the Repository
 ```bash
-git clone https://github.com/pronad1/Socket_Programming.git
-cd Socket_Programming
-```
-
-### 2. Set Up Python Environment (if using Python)
-```bash
-# Create virtual environment
+# (optional) create and activate a virtual environment
 python -m venv venv
-
-# Activate virtual environment
-# On Windows:
+# Windows
 venv\Scripts\activate
-# On Linux/Mac:
-source venv/bin/activate
+# Linux/Mac
+# source venv/bin/activate
 
-# Install required packages (if any)
+# install dependencies
 pip install -r requirements.txt
 ```
 
-### 3. Compile C Programs (if using C)
-```bash
-# Navigate to C source directory
-cd src/c/
-
-# Compile server and client
-gcc -o server server.c
-gcc -o client client.c
-```
-
-### 4. Compile Java Programs (if using Java)
-```bash
-# Navigate to Java source directory
-cd src/java/
-
-# Compile Java files
-javac *.java
-```
-
 ## Project Structure
-
 ```
-Socket_Programming/
-├── README.md                          # This comprehensive guide
-├── requirements.txt                   # Python dependencies
-├── src/                              # Source code directory
-│   ├── python/                       # Python implementations
-│   │   ├── simple_socket/           # Basic socket examples
-│   │   │   ├── server.py           # TCP server implementation
-│   │   │   └── client.py           # TCP client implementation
-│   │   ├── web_server/             # HTTP server implementation
-│   │   │   └── webserver.py        # Basic HTTP web server
-│   │   ├── udp_pinger/             # UDP ping implementation
-│   │   │   ├── udp_pinger_server.py
-│   │   │   └── udp_pinger_client.py
-│   │   └── smtp_client/            # SMTP client implementation
-│   │       └── smtp_client.py
-│   ├── java/                        # Java implementations
-│   │   ├── SimpleSocket/           # Basic socket examples
-│   │   ├── UDPPinger/             # UDP ping implementation
-│   │   └── WebProxy/              # Web proxy server
-│   ├── c/                          # C implementations
-│   │   ├── simple_socket/         # Basic socket examples
-│   │   ├── rdt_protocol/          # Reliable data transfer
-│   │   └── distance_vector/       # Distance vector routing
-│   └── video_streaming/            # 🎬 Professional Video Streaming System
-│       ├── server/                 # RTSP/RTP streaming server
-│       │   └── video_server.py    # Main video streaming server
-│       ├── client/                 # GUI video streaming client
-│       │   └── video_client.py    # Professional video client
-│       ├── protocols/              # Protocol implementations
-│       │   ├── rtsp_protocol.py   # RTSP protocol handling
-│       │   └── rtp_protocol.py    # RTP packet management
-│       ├── utils/                  # Video streaming utilities
-│       │   └── video_utils.py     # Video processing utilities
-│       ├── media/                  # Sample media files
-│       │   └── create_samples.py  # Media file generator
-│       ├── tests/                  # Comprehensive test suite
-│       │   └── test_video_streaming.py
-│       └── README.md               # Video streaming documentation
-├── assignments/                      # Programming assignments
-│   ├── udp_streaming/               # UDP streaming assignment
-│   │   ├── streaming_server.py     # UDP streaming server
-│   │   ├── streaming_client.py     # UDP streaming client
-│   │   ├── test_streaming.py       # Automated test suite
-│   │   └── quick_test.py           # Quick validation tool
-│   ├── tcp_file_transfer/          # File transfer assignment
-│   ├── multi_threading/            # Multi-threading exercises
-│   └── network_protocols/          # Protocol implementation
-├── docs/                            # Documentation and guides
-│   ├── protocol_specifications.md  # Protocol documentation
-│   ├── testing_guide.md           # Testing procedures
-│   └── performance_analysis.md    # Performance metrics
-├── tests/                          # Test files and scripts
-│   ├── unit_tests/                 # Unit test cases
-│   ├── integration_tests/          # Integration test cases
-│   └── performance_tests/          # Performance benchmarks
-└── examples/                       # Example configurations
-    ├── sample_configs/             # Sample configuration files
-    └── demo_scripts/              # Demonstration scripts
+d:\Languages\Socket_Programming\
+├── README.md
+├── requirements.txt
+├── icmp_pinger_gui.py        # GUI ping client
+└── icmp_ping_server.py       # Optional echo server
 ```
 
 ## Usage
 
-### Running the ICMP Pinger Lab
-
-Launch the Application:
-```
-cd src/python/icmp_pinger_lab/
-python main.py
-```
-Note: Run PowerShell as Administrator for full ICMP functionality.
-
-Ping Client Usage:
-
-- Go to the "🏓 Ping Client" tab.
-- Set "Target Host" (e.g., 8.8.8.8 or localhost).
-- Set "Count" (e.g., 10) and "Interval (s)" (e.g., 1.0).
-- Click "🚀 Start Ping" to begin; check the log and RTT graph for results.
-
-Echo Server Usage:
-
-- Go to the "📡 Echo Server" tab.
-- Set "Listen Address" (e.g., 0.0.0.0) and "Response Delay (ms)" (e.g.,50).
-- Click "✅ Validate" and then "▶️ Start Server" to simulate activity.
-Monitor the log for simulated echo replies.
-
-
-## Available Programs
-
-### 1. Simple Client-Server Socket Program
-- **Languages**: Python, Java, C
-- **Protocol**: TCP
-- **Description**: Basic client-server communication with message exchange
-- **Location**: `src/[language]/simple_socket/`
-
-### 2. Web Server Implementation
-- **Language**: Python
-- **Protocol**: HTTP
-- **Description**: Basic HTTP web server serving static files
-- **Location**: `src/python/web_server/`
-
-### 3. UDP Pinger Lab
-- **Languages**: Python, Java
-- **Protocol**: UDP
-- **Description**: Ping client using UDP sockets with packet loss simulation
-- **Location**: `src/[language]/udp_pinger/`
-
-### 4. SMTP Client
-- **Languages**: Python, Java
-- **Protocol**: SMTP over TCP
-- **Description**: Email client implementation using SMTP protocol
-- **Location**: `src/[language]/smtp_client/`
-
-### 5. Professional Video Streaming System 🎬
-- **Language**: Python
-- **Protocols**: RTSP/RTP
-- **Description**: Complete video streaming solution with GUI client and RTSP/RTP server
-- **Features**:
-  - RTSP control protocol implementation
-  - RTP real-time video streaming
-  - GUI client with playback controls
-  - Multiple quality profiles (480p-4K)
-  - Video library management
-  - Cross-platform media player integration
-- **Location**: `src/video_streaming/`
-- **Quick Start**:
-  ```bash
-  # Start server
-  cd src/video_streaming/server
-  python video_server.py
-  
-  # Launch client (in new terminal)
-  cd src/video_streaming/client
-  python video_client.py
-  ```
-
-### 6. HTTP Web Proxy Server
-- **Languages**: Python, Java
-- **Protocol**: HTTP over TCP
-- **Description**: Proxy server implementation with caching capabilities
-- **Location**: `src/[language]/web_proxy/`
-
-## Testing
-
-### Quick Testing Options
-
-**🚀 Automated Test Runner (Recommended)**
+### Run the GUI Ping Client
 ```bash
-# Windows
-run_tests.bat
-
-# Linux/Mac  
-chmod +x run_tests.sh
-./run_tests.sh
+python d:\Languages\Socket_Programming\icmp_pinger_gui.py
 ```
+- Enter Target Host (e.g., 8.8.8.8 or localhost), Count, Timeout (s)
+- Click Start Ping to see per-ping results and final statistics
 
-**⚡ Quick Validation**
+### (Optional) Run the Echo Server
 ```bash
-# Check if everything is working
-python validate_project.py
-
-# Quick health check only
-python validate_project.py --quick
+# Use an elevated shell (Administrator on Windows / sudo on Linux)
+python d:\Languages\Socket_Programming\icmp_ping_server.py
 ```
-
-**📋 Component-Specific Testing**
-```bash
-# Test UDP streaming assignment
-cd my_part_udp_streaming
-python quick_test.py
-
-# Test video streaming system
-cd src/video_streaming
-python run_project_tests.py
-
-# Start complete video streaming system
-cd src/video_streaming  
-python start_streaming.py all
-```
-
-### Test Categories
-- **Project Structure**: Verify all files and directories exist
-- **Dependencies**: Check Python version and required modules  
-- **Network Connectivity**: Test socket creation and port binding
-- **Assignment Functionality**: UDP streaming with 1000-2000 byte chunks
-- **Video Streaming System**: RTSP/RTP protocols, GUI client, server functionality
-- **Integration**: End-to-end client-server communication
-- **Performance**: Streaming throughput and latency benchmarks
-
-📖 **Detailed Testing Guide**: See [TESTING.md](TESTING.md) for comprehensive testing instructions.
-
-### Legacy Unit Tests
-```bash
-# Run Python tests
-python -m pytest tests/unit_tests/
-
-# Run Java tests
-cd tests/java/
-javac -cp .:junit-4.12.jar *.java
-java -cp .:junit-4.12.jar org.junit.runner.JUnitCore TestSuite
-```
-
-### Integration Tests
-```bash
-# Run integration test suite
-cd tests/integration_tests/
-python test_client_server_integration.py
-```
-
-### Performance Testing
-```bash
-# Run performance benchmarks
-cd tests/performance_tests/
-python benchmark_throughput.py
-python benchmark_latency.py
-```
-
-## Implementation Details
-
-### Socket Programming Concepts Demonstrated:
-
-1. **TCP Sockets**:
-   - Reliable connection-oriented communication
-   - Error detection and correction
-   - Flow control mechanisms
-
-2. **UDP Sockets**:
-   - Connectionless communication
-   - Low-latency applications
-   - Packet loss handling
-
-3. **Protocol Design**:
-   - Custom message formats
-   - State management
-   - Error handling strategies
-
-4. **Concurrency**:
-   - Multi-threaded servers
-   - Asynchronous I/O
-   - Connection pooling
-
-### Error Handling:
-- Connection timeouts
-- Network unreachability
-- Malformed packets
-- Resource exhaustion
-
-## Learning Objectives
-
-After completing these assignments, students will understand:
-
-- Socket API and system calls
-- Network protocol implementation
-- Client-server architecture patterns
-- Error handling in distributed systems
-- Performance considerations in network programming
-- Security implications of network applications
+- Replies to ICMP Echo Requests
+- May add a small random delay to simulate network variability
 
 ## Troubleshooting
-
-### Common Issues:
-
-1. **Port Already in Use**:
-   ```bash
-   # Find process using the port
-   netstat -ano | findstr :12000
-   # Kill the process
-   taskkill /PID [process_id] /F
-   ```
-
-2. **Firewall Blocking Connections**:
-   - Add exception for your application
-   - Check Windows Defender Firewall settings
-
-3. **Permission Denied (Ports < 1024)**:
-   - Use ports above 1024 for testing
-   - Run as administrator if necessary
-
-4. **Module Import Errors**:
-   ```bash
-   # Ensure virtual environment is activated
-   pip install --upgrade pip
-   pip install -r requirements.txt
-   ```
-
-## Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/new-protocol`)
-3. Commit your changes (`git commit -am 'Add new protocol implementation'`)
-4. Push to the branch (`git push origin feature/new-protocol`)
-5. Create a Pull Request
-
-### Contribution Guidelines:
-- Follow existing code style and conventions
-- Add comprehensive documentation
-- Include unit tests for new features
-- Update README.md if adding new programs
+- Permission denied / raw socket errors:
+  - Windows: run PowerShell as Administrator
+  - Linux/Mac: use sudo
+- “No libpcap provider available” warning:
+  - Install Npcap on Windows if using sniffing; GUI client works without it
+- Timeouts to public hosts:
+  - ICMP may be blocked by firewalls; try 8.8.8.8 or your gateway
+- Import/module errors:
+  - Ensure venv is active and run: `pip install -r requirements.txt`
 
 ## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-### Academic Use Notice:
-These programming assignments are adapted from materials by J.F. Kurose and K.W. Ross. 
-Original assignments copyright 1993-2025, J.F. Kurose, K.W. Ross, All Rights Reserved.
+This project is licensed under the MIT License. See the LICENSE file for details.
 
 ## Contact
-
-**Project Maintainer**: [Prosenjit Mondol]
-- GitHub: [@pronad1](https://github.com/pronad1)
-- Email: [prosenjit1156@gmail.com]
-
-**Course Information**:
-- Course: Computer Networks / Socket Programming
-- Institution: [Patuakhali Science and Technology University]
-- Semester: [5th]
-
-**Resources**:
-- [Official Course Website](https://gaia.cs.umass.edu/kurose_ross/programming.php)
-- [Textbook: Computer Networking: A Top-Down Approach](https://www.pearson.com/us/higher-education/program/Kurose-Computer-Networking-A-Top-Down-Approach-8th-Edition/PGM2877610.html)
-
----
-
-**Note**: This project is for educational purposes. Please ensure you understand your institution's academic integrity policies regarding programming assignments.
+Maintainer: Prosenjit Mondol  
+GitHub: https://github.com/pronad1  
+Email: prosenjit1156@gmail.com
