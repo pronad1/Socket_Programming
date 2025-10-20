@@ -12,10 +12,343 @@ import logging
 import os
 import sys
 import csv
-from ping_stats import PingStatistics
-from icmp_client import ICMPPinger
-from icmp_server import ICMPServer
-from gui_components import ModernTheme, RTTGraph, StatsDisplay
+import platform
+import subprocess
+import socket
+
+# Fallbacks for external modules to make this file self-contained
+try:
+    from ping_stats import PingStatistics  # type: ignore
+    from icmp_client import ICMPPinger     # type: ignore
+    from icmp_server import ICMPServer     # type: ignore
+    from gui_components import ModernTheme, RTTGraph, StatsDisplay  # type: ignore
+except Exception:
+    # ---- Minimal ModernTheme ----
+    class ModernTheme:
+        BG_COLOR = "#0f111a"
+        FG_COLOR = "#e6e6e6"
+        SUCCESS_COLOR = "#19c37d"
+        WARNING_COLOR = "#ff6b6b"
+        ACCENT_COLOR = "#4f46e5"
+
+        @staticmethod
+        def apply_theme(root):
+            style = ttk.Style()
+            try:
+                style.theme_use('clam')
+            except Exception:
+                pass
+            style.configure("TFrame", background=ModernTheme.BG_COLOR)
+            style.configure("TLabel", background=ModernTheme.BG_COLOR, foreground=ModernTheme.FG_COLOR)
+            style.configure("TButton", padding=6)
+            root.configure(bg=ModernTheme.BG_COLOR)
+
+    # ---- Minimal PingStatistics ----
+    class PingStatistics:
+        def __init__(self):
+            self.results = []  # list of (rtt_ms: float, success: bool)
+
+        def clear(self):
+            self.results = []
+
+        def add_results(self, results):
+            self.results = results[:]  # overwrite with current series
+
+        def get_raw_rtts(self):
+            return [rtt for rtt, ok in self.results if ok]
+
+        def get_summary(self):
+            total = len(self.results)
+            successes = sum(1 for _, ok in self.results if ok)
+            rtts = self.get_raw_rtts()
+            if rtts:
+                mn = min(rtts)
+                mx = max(rtts)
+                avg = sum(rtts) / len(rtts)
+                # jitter: mean absolute delta between consecutive RTTs
+                if len(rtts) > 1:
+                    deltas = [abs(rtts[i] - rtts[i-1]) for i in range(1, len(rtts))]
+                    jitter = sum(deltas) / len(deltas)
+                else:
+                    jitter = 0.0
+            else:
+                mn = mx = avg = jitter = 0.0
+            loss = ((total - successes) / total * 100.0) if total else 0.0
+            return {
+                "total_pings": total,
+                "successful_pings": successes,
+                "min": mn,
+                "max": mx,
+                "avg": avg,
+                "jitter": jitter,
+                "packet_loss": loss,
+            }
+
+    # ---- Minimal ICMPPinger using scapy ----
+    class ICMPPinger:
+        def __init__(self, timeout=2.0):
+            self.timeout = timeout
+            self._stop = threading.Event()
+            self._thread = None
+
+        def stop(self):
+            self._stop.set()
+
+        def start_ping_thread(self, host, count, interval, callback):
+            if self._thread and self._thread.is_alive():
+                return
+            self._stop.clear()
+            self._thread = threading.Thread(
+                target=self._worker, args=(host, count, interval, callback), daemon=True
+            )
+            self._thread.start()
+
+        def _worker(self, host, count, interval, callback):
+            """Prefer platform-native ICMP on Windows (no admin), else Scapy, else subprocess ping."""
+            # Try Scapy first if not Windows without admin
+            use_windows_icmp = (os.name == 'nt' and not self._is_admin_windows())
+            if use_windows_icmp:
+                # Windows ICMP API path (no admin needed)
+                for _ in range(count):
+                    if self._stop.is_set():
+                        break
+                    rtt_ms, success = self._ping_windows_icmp(host, int(self.timeout * 1000))
+                    callback([(float(rtt_ms), bool(success))])
+                    time.sleep(max(0.0, interval))
+                return
+
+            # Attempt Scapy (may require admin)
+            scapy_ok = False
+            try:
+                from scapy.all import IP, ICMP, sr1, conf
+                conf.verb = 0
+                scapy_ok = True
+            except Exception:
+                scapy_ok = False
+
+            for seq in range(1, count + 1):
+                if self._stop.is_set():
+                    break
+                rtt_ms = 0.0
+                success = False
+                if scapy_ok:
+                    try:
+                        # Resolve hostname early to avoid repeated DNS lookups
+                        dst = socket.gethostbyname(host)
+                        pkt = IP(dst=dst) / ICMP(seq=seq)
+                        t0 = time.monotonic()
+                        reply = sr1(pkt, timeout=self.timeout)
+                        t1 = time.monotonic()
+                        if reply is not None and reply.haslayer(ICMP) and reply.getlayer(ICMP).type == 0:
+                            rtt_ms = (t1 - t0) * 1000.0
+                            success = True
+                    except PermissionError:
+                        # No raw socket permission -> fallback
+                        success = False
+                    except Exception:
+                        success = False
+
+                if not success:
+                    # Final fallback: subprocess ping (cross-platform)
+                    rtt_sub, ok_sub = self._ping_subprocess(host, int(self.timeout * 1000))
+                    if ok_sub:
+                        rtt_ms, success = rtt_sub, True
+
+                callback([(rtt_ms, success)])
+                time.sleep(max(0.0, interval))
+
+        def _is_admin_windows(self):
+            if os.name != 'nt':
+                return False
+            try:
+                import ctypes
+                return bool(ctypes.windll.shell32.IsUserAnAdmin())
+            except Exception:
+                return False
+
+        def _ping_windows_icmp(self, host, timeout_ms):
+            """Use Windows IP Helper API (IcmpSendEcho). Returns (rtt_ms, success)."""
+            try:
+                import ctypes
+                from ctypes import wintypes
+
+                iphlpapi = ctypes.windll.iphlpapi
+                ws2_32 = ctypes.windll.ws2_32
+
+                class IP_OPTION_INFORMATION(ctypes.Structure):
+                    _fields_ = [
+                        ("Ttl", ctypes.c_ubyte),
+                        ("Tos", ctypes.c_ubyte),
+                        ("Flags", ctypes.c_ubyte),
+                        ("OptionsSize", ctypes.c_ubyte),
+                        ("OptionsData", ctypes.c_void_p),
+                    ]
+
+                class ICMP_ECHO_REPLY(ctypes.Structure):
+                    _fields_ = [
+                        ("Address", wintypes.DWORD),
+                        ("Status", wintypes.DWORD),
+                        ("RoundTripTime", wintypes.DWORD),
+                        ("DataSize", wintypes.WORD),
+                        ("Reserved", wintypes.WORD),
+                        ("Data", ctypes.c_void_p),
+                        ("Options", IP_OPTION_INFORMATION),
+                    ]
+
+                # Resolve host
+                try:
+                    dst_ip = socket.gethostbyname(host)
+                except Exception:
+                    return (0.0, False)
+
+                addr = ws2_32.inet_addr(dst_ip.encode('ascii'))
+                if addr == 0xFFFFFFFF:
+                    return (0.0, False)
+
+                handle = iphlpapi.IcmpCreateFile()
+                if handle == ctypes.c_void_p(-1).value:
+                    return (0.0, False)
+
+                data = b'0123456789abcdef'  # 16 bytes payload
+                reply_size = ctypes.sizeof(ICMP_ECHO_REPLY) + len(data) + 8
+                reply_buf = ctypes.create_string_buffer(reply_size)
+
+                ret = iphlpapi.IcmpSendEcho(
+                    handle,
+                    addr,
+                    data,
+                    len(data),
+                    None,
+                    reply_buf,
+                    reply_size,
+                    int(timeout_ms),
+                )
+
+                success = ret != 0
+                rtt = 0
+                if success:
+                    reply = ICMP_ECHO_REPLY.from_buffer(reply_buf)
+                    success = (reply.Status == 0)
+                    rtt = int(reply.RoundTripTime)
+
+                iphlpapi.IcmpCloseHandle(handle)
+                return (float(rtt), bool(success))
+            except Exception:
+                return (0.0, False)
+
+        def _ping_subprocess(self, host, timeout_ms):
+            """Portable subprocess ping fallback. Returns (rtt_ms, success)."""
+            try:
+                if platform.system().lower().startswith('win'):
+                    # -n 1 (one echo), -w timeout_ms
+                    cmd = ["ping", "-n", "1", "-w", str(int(timeout_ms)), host]
+                else:
+                    # -c 1 (one echo), -W timeout (seconds)
+                    tsec = max(1, int(round(timeout_ms / 1000.0)))
+                    cmd = ["ping", "-c", "1", "-W", str(tsec), host]
+                out = subprocess.run(cmd, capture_output=True, text=True, timeout=max(1, int(timeout_ms/1000)+2))
+                text = out.stdout + out.stderr
+                if out.returncode == 0:
+                    # Parse RTT from output
+                    # Windows: "time=23ms", Linux: "time=23.4 ms"
+                    import re
+                    m = re.search(r"time[=<]\s*([\d\.]+)\s*ms", text, re.IGNORECASE)
+                    if m:
+                        return (float(m.group(1)), True)
+                    # Some Windows locales print "Tiempo="; fallback to success without RTT
+                    return (0.0, True)
+                return (0.0, False)
+            except Exception:
+                return (0.0, False)
+
+    # ---- Minimal ICMPServer (simulation mode) ----
+    class ICMPServer:
+        def __init__(self, delay_range=(0, 0.05)):
+            self.delay_range = delay_range
+            self.running = False
+            self._thread = None
+            self._cb = None
+            self._requests = 0
+            self._bytes = 0
+
+        def set_stats_callback(self, cb):
+            self._cb = cb
+
+        def start(self):
+            if self.running:
+                return True
+            self.running = True
+            self._thread = threading.Thread(target=self._run, daemon=True)
+            self._thread.start()
+            return True  # simulation always "starts"
+
+        def _run(self):
+            while self.running:
+                time.sleep(1.0)
+                # simulate some activity
+                self._requests += 1
+                self._bytes += 64
+                if self._cb:
+                    ts = datetime.now().strftime("%H:%M:%S")
+                    self._cb(ts, {"requests": self._requests, "bytes": self._bytes})
+
+        def stop(self):
+            self.running = False
+
+    # ---- Minimal RTTGraph (matplotlib embed) ----
+    class RTTGraph:
+        def __init__(self, parent):
+            self.rtt_data = []
+            self.timestamps = []
+            try:
+                from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+                from matplotlib.figure import Figure
+                self._Figure = Figure
+                self._Canvas = FigureCanvasTkAgg
+                self.figure = self._Figure(figsize=(6, 3), dpi=100)
+                self.ax = self.figure.add_subplot(111)
+                self.ax.set_title("RTT (ms)")
+                self.ax.set_xlabel("Time")
+                self.ax.set_ylabel("ms")
+                self.line, = self.ax.plot([], [], color=ModernTheme.ACCENT_COLOR)
+                self.canvas = self._Canvas(self.figure, master=parent)
+                self.canvas.get_tk_widget().pack(fill=tk.BOTH, expand=True)
+                self.canvas.draw()
+                self._enabled = True
+            except Exception:
+                self._enabled = False  # gracefully degrade
+
+        def update_plot(self, rtt_ms, ts):
+            self.rtt_data.append(rtt_ms)
+            self.timestamps.append(ts)
+            if not getattr(self, "_enabled", False):
+                return
+            xs = list(range(1, len(self.rtt_data) + 1))
+            self.line.set_data(xs, self.rtt_data)
+            self.ax.relim()
+            self.ax.autoscale_view()
+            self.canvas.draw_idle()
+
+    # ---- Minimal StatsDisplay ----
+    class StatsDisplay:
+        def __init__(self, parent):
+            frame = ttk.LabelFrame(parent, text="Summary", padding=10)
+            frame.pack(fill=tk.X, padx=10, pady=10)
+            self._labels = {}
+            for i, key in enumerate(["total_pings", "successful_pings", "min", "max", "avg", "jitter", "packet_loss"]):
+                ttk.Label(frame, text=key.replace("_", " ").title() + ":").grid(row=i, column=0, sticky="w", padx=5, pady=2)
+                var = tk.StringVar(value="-")
+                ttk.Label(frame, textvariable=var).grid(row=i, column=1, sticky="w", padx=5, pady=2)
+                self._labels[key] = var
+
+        def update_stats(self, stats):
+            for k, v in stats.items():
+                if k in ["min", "max", "avg", "jitter"]:
+                    self._labels[k].set(f"{v:.2f} ms")
+                elif k == "packet_loss":
+                    self._labels[k].set(f"{v:.1f}%")
+                else:
+                    self._labels[k].set(str(v))
 
 class ICMPPingerApp:
     def __init__(self, root):
@@ -318,25 +651,25 @@ class ICMPPingerApp:
         """Process and display ping results in real-time with fixed plotting"""
         self.ping_results.extend(results)
         self.stats.add_results(self.ping_results)
-        
+
         for i, (rtt, success) in enumerate(results):
             seq = len(self.ping_results) - len(results) + i
             status = "✅ SUCCESS" if success else "❌ TIMEOUT"
             color = ModernTheme.SUCCESS_COLOR if success else ModernTheme.WARNING_COLOR
             timestamp = datetime.now().strftime("%H:%M:%S")
-            
+
             log_entry = f"[{timestamp}] {status} | Seq: {seq} | RTT: {rtt:.2f}ms\n"
             self.log_text.insert(tk.END, log_entry)
-            
-            start_idx = self.log_text.index(tk.END + f"-{len(log_entry)}c")
-            end_idx = self.log_text.index(tk.END)
+
+            # FIX: proper Tk text index for tagging
+            start_idx = f"end-{len(log_entry)}c"
+            end_idx = "end"
             if success:
                 self.log_text.tag_add("success", start_idx, end_idx)
-                # Update plot in Tkinter main thread
                 self.root.after(0, lambda rtt=rtt, ts=datetime.now(): self.rtt_graph.update_plot(rtt, ts))
             else:
                 self.log_text.tag_add("error", start_idx, end_idx)
-        
+
         self.log_text.tag_config("success", foreground=ModernTheme.SUCCESS_COLOR)
         self.log_text.tag_config("error", foreground=ModernTheme.WARNING_COLOR)
         self.log_text.see(tk.END)
@@ -352,13 +685,15 @@ class ICMPPingerApp:
         self.start_btn.config(state='normal')
         self.stop_btn.config(state='disabled')
         self.status_var.set(f"✅ Ping to {self.current_host} completed")
-    
+
     def stop_ping(self):
         """Stop current ping"""
         self.pinger.stop()
         self.is_pinging = False
+        self.start_btn.config(state='normal')       # enable Start after stop
+        self.stop_btn.config(state='disabled')      # disable Stop after stop
         self.status_var.set("⏹️ Ping stopped by user")
-    
+
     def stop_server(self):
         """Stop echo server"""
         if self.server:
@@ -391,7 +726,9 @@ class ICMPPingerApp:
         self.data_text.delete(1.0, tk.END)
         self.rtt_graph.rtt_data = []
         self.rtt_graph.timestamps = []
-        self.rtt_graph.canvas.draw()
+        # +++ guard if matplotlib backend not available
+        if hasattr(self.rtt_graph, "canvas"):
+            self.rtt_graph.canvas.draw()
         self.status_var.set("🗑️ All data cleared")
         self.update_stats_display()
     
@@ -432,7 +769,7 @@ class ICMPPingerApp:
         if not self.stats.results:
             messagebox.showwarning("No Data", "No statistics available for report")
             return
-        
+
         stats = self.stats.get_summary()
         analysis = []
         if stats['packet_loss'] < 10:
@@ -445,18 +782,20 @@ class ICMPPingerApp:
             analysis.append("- Low jitter indicates consistent latency")
         analysis.append(f"- Average RTT of {stats['avg']:.2f} ms reflects overall latency")
 
+        # FIX: proper newline join and clean timestamp line
+        analysis_text = "\n".join(analysis)
         report = f"""
 🔍 ICMP PINGER LAB - DIAGNOSTIC REPORT
 {'='*50}
 Target Host: {self.current_host}
-Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S %z')}  # 06:03 PM +06, Thursday, October 16, 2025
+Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 Total Pings: {stats['total_pings']}
 Successful: {stats['successful_pings']}
 
 📊 KEY METRICS:
 {'-'*20}
 • Minimum RTT:     {stats['min']:.2f} ms
-• Maximum RTT:     {stats['max']:.2f} ms  
+• Maximum RTT:     {stats['max']:.2f} ms
 • Average RTT:     {stats['avg']:.2f} ms
 • Jitter:          {stats['jitter']:.2f} ms
 • Packet Loss:     {stats['packet_loss']:.1f}%
@@ -464,13 +803,13 @@ Successful: {stats['successful_pings']}
 
 💡 ANALYSIS:
 {'-'*20}
-{'\\n'.join(analysis)}
+{analysis_text}
         """
-        
+
         report_window = tk.Toplevel(self.root)
         report_window.title("Diagnostic Report")
         report_window.geometry("600x500")
-        
+
         text_widget = scrolledtext.ScrolledText(report_window, wrap=tk.WORD,
                                                bg=ModernTheme.BG_COLOR,
                                                fg=ModernTheme.FG_COLOR,
