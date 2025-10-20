@@ -1,50 +1,51 @@
 # ICMP Pinger Lab (Python)
 
-A simple ICMP ping application with a GUI client and an optional echo server. The client sends ICMP Echo Requests, measures round-trip time (RTT), and reports per-ping results and summary statistics.
-
+A GUI-based ICMP ping application with live RTT graphing, per-ping logs, and summary statistics. Works on Windows without administrator rights using the Windows ICMP API, and uses Scapy/raw sockets when privileges are available. Includes an optional echo server simulation inside the GUI.
 
 ## Table of Contents
-- [Overview](#overview)
-- [Features](#features)
-- [Prerequisites](#prerequisites)
-- [Installation](#installation)
-- [Project Structure](#project-structure)
-- [Usage](#usage)
-- [Troubleshooting](#troubleshooting)
-- [License](#license)
-- [Contact](#contact)
+- Overview
+- Features
+- Prerequisites
+- Installation
+- Project Structure
+- Usage
+- Troubleshooting
+- License
+- Contact
 
 ## Overview
-This lab includes:
-- A GUI-based ICMP Ping Client for measuring RTT and packet loss.
-- An optional ICMP Echo Server that replies to Echo Requests (with optional random delay).
+This lab provides:
+- A modern GUI ping client to measure RTT and packet loss.
+- An optional echo server simulation to visualize server-side activity.
+- Robust Windows support:
+  - No admin needed for basic pings (uses Windows ICMP API).
+  - Admin enables Scapy/raw sockets path.
 
 ## Features
-- GUI controls: target host, count, timeout
-- Per-ping RTT and timeout reporting
-- Summary stats: sent/received, loss, average RTT
-- Optional echo server with random delay simulation
-- Threaded client for a responsive UI
+- GUI controls: target host, count, interval
+- Per-ping RTT reporting and colored log status
+- Live RTT plot and summary statistics (min/max/avg, jitter, loss)
+- CSV export and a readable diagnostic report
+- Echo server simulation with adjustable delay
 
 ## Prerequisites
-- Python 3.8+ (Tkinter included in standard Python on Windows)
-- Dependencies (see requirements.txt):
-  - scapy
-  - numpy, matplotlib (optional)
-- Windows:
-  - Run the scripts in an elevated PowerShell (Administrator) for raw sockets
-  - Optional: Npcap (https://npcap.com/) for advanced sniffing
+- Python 3.8+
+- Install dependencies:
+  - pip install -r requirements.txt
+- Windows notes:
+  - Basic pings work without admin (Windows ICMP API).
+  - For Scapy/raw sockets and real sniffing, run PowerShell as Administrator and consider Npcap.
 
 ## Installation
 ```bash
-# (optional) create and activate a virtual environment
+# Optional: create and activate a virtual environment
 python -m venv venv
 # Windows
 venv\Scripts\activate
 # Linux/Mac
 # source venv/bin/activate
 
-# install dependencies
+# Install dependencies
 pip install -r requirements.txt
 ```
 
@@ -53,37 +54,39 @@ pip install -r requirements.txt
 d:\Languages\Socket_Programming\
 ├── README.md
 ├── requirements.txt
-├── icmp_pinger_gui.py        # GUI ping client
-└── icmp_ping_server.py       # Optional echo server
+├── main.py                # GUI application (entry point)
+└── icmp_client.py         # ICMP ping client with Windows/Scapy/subprocess fallbacks
 ```
 
 ## Usage
 
-### Run the GUI Ping Client
+### Start the GUI
 ```bash
-python d:\Languages\Socket_Programming\icmp_pinger_gui.py
+python d:\Languages\Socket_Programming\main.py
 ```
-- Enter Target Host (e.g., 8.8.8.8 or localhost), Count, Timeout (s)
-- Click Start Ping to see per-ping results and final statistics
+- Enter Target Host (e.g., 8.8.8.8), Count, and Interval (s).
+- Click “Start Ping” to see live results, graph, and statistics.
+- Use “Export CSV” or “Generate Report” in the Statistics tab.
+- The Echo Server tab runs a simulation for server activity logs.
 
-### (Optional) Run the Echo Server
+### Quick CLI check (optional)
 ```bash
-# Use an elevated shell (Administrator on Windows / sudo on Linux)
-python d:\Languages\Socket_Programming\icmp_ping_server.py
+python d:\Languages\Socket_Programming\icmp_client.py
 ```
-- Replies to ICMP Echo Requests
-- May add a small random delay to simulate network variability
+Prints RTT and success for a few pings to 8.8.8.8.
 
 ## Troubleshooting
-- Permission denied / raw socket errors:
-  - Windows: run PowerShell as Administrator
-  - Linux/Mac: use sudo
+- Permission/Raw socket errors:
+  - Windows: run PowerShell as Administrator to enable Scapy/raw sockets.
+  - Without admin, the app still works using Windows ICMP API fallback.
 - “No libpcap provider available” warning:
-  - Install Npcap on Windows if using sniffing; GUI client works without it
+  - Install Npcap on Windows for advanced sniffing (not required for basic ping).
 - Timeouts to public hosts:
-  - ICMP may be blocked by firewalls; try 8.8.8.8 or your gateway
-- Import/module errors:
-  - Ensure venv is active and run: `pip install -r requirements.txt`
+  - Firewalls or networks may block ICMP. Try 8.8.8.8 or your default gateway.
+- Graph not updating:
+  - Ensure matplotlib is installed via requirements.txt. The app gracefully disables plotting if unavailable.
+- Dependencies:
+  - Activate your venv and run: pip install -r requirements.txt
 
 ## License
 This project is licensed under the MIT License. See the LICENSE file for details.
