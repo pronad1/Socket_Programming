@@ -833,6 +833,7 @@ def main():
     root.protocol("WM_DELETE_WINDOW", on_closing)
     root.mainloop()
 
+
 if __name__ == "__main__":
     print("🔍 Starting ICMP Pinger Lab...")
     print("💡 TIP: Right-click PowerShell → 'Run as Administrator' for full features!")
