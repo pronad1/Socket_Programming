@@ -2,7 +2,6 @@
 A GUI-based ICMP ping application with live RTT graphing, per-ping logs, and summary statistics. Works on Windows without administrator rights using the Windows ICMP API, and uses Scapy/raw sockets when privileges are available. Includes an optional echo server simulation inside the GUI.
 
 
-
 ## Table of Contents
 - Overview
 - Features
